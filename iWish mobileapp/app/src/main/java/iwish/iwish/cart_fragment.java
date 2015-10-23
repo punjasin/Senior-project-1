@@ -17,7 +17,7 @@ import java.util.ArrayList;
  * Created by hp1 on 21-01-2015.
  */
 public class cart_fragment extends Fragment {
-    public static ArrayList<String> list = new ArrayList<String>();
+    public static ArrayList<product> list = new ArrayList<product>();
 
 
     @Override

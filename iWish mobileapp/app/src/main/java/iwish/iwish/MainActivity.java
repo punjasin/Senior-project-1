@@ -3,45 +3,45 @@ package iwish.iwish;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.StrictMode;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.springframework.http.client.CommonsClientHttpRequestFactory;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 
 public class MainActivity extends ActionBarActivity {
+    public static Context context1;
 
     // Declaring Your View and Variables
-
     Toolbar toolbar;
     ViewPager pager;
     ViewPagerAdapter adapter;
     SlidingTabLayout tabs;
     CharSequence Titles[]={"Wishlist","Shopping Cart","Comparison"};
     int Numboftabs =3;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,8 +78,9 @@ public class MainActivity extends ActionBarActivity {
 
         StrictMode.enableDefaults(); //STRICT MODE ENABLED
 
-        //resultView = (TextView) findViewById(R.id.result);
+        scheduleUpdate();
 
+        //resultView = (TextView) findViewById(R.id.result);
     }
 
 
@@ -137,12 +138,50 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    public void Cal(){
+        final TextView textTotal = (TextView)findViewById(R.id.textTotal);
+
+        double total = 0.0;
+        for (product item : cart_fragment.list) {
+            double t = item.getPrice() * item.getAmountOf();
+            total += t;
+        }
+        textTotal.setText(Double.toString(total));
+
+    }
+
+    public void getData(String id){
+        String url = "http://192.168.43.96:8080/rest/product/" + id;
+
+        // Create a new RestTemplate instance
+        RestTemplate restTemplate = new RestTemplate();
+        //restTemplate.setRequestFactory(new CommonsClientHttpRequestFactory());
+
+
+        // Add the String message converter
+        restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
+
+        // Make the HTTP GET request, marshaling the response to a String
+        String result = restTemplate.getForObject(url, String.class);
+
+
+        try {
+            JSONObject jsonObject = new JSONObject(result);
+            //,Integer.valueOf(jsonObject.get("amount").toString()),Double.valueOf(jsonObject.get("promoprice").toString())
+
+            product p = new product(jsonObject.get("code").toString(), jsonObject.get("name").toString(), jsonObject.get("description").toString(), jsonObject.get("categorize").toString(), Double.valueOf(jsonObject.get("netweight").toString()), Double.valueOf(jsonObject.get("price").toString()), 1);
+            cart_fragment.list.add(p);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public void AddToCart(View view) {
 
         final Context context = this;
-        final EditText result;
 
-//        result = (EditText) findViewById(R.id.editTextResult);
 
         // get prompts.xml view
         LayoutInflater li = LayoutInflater.from(context);
@@ -163,19 +202,8 @@ public class MainActivity extends ActionBarActivity {
                             public void onClick(DialogInterface dialog, int id) {
                                 // get user input and set it to result
                                 // The connection URL
-                                String url = "http://192.168.43.96:8080/rest/product/" + userInput.getText();
-                                HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+                                getData(userInput.getText().toString());
 
-                                // Create a new RestTemplate instance
-                                RestTemplate restTemplate = new RestTemplate();
-
-                                // Add the String message converter
-                                restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
-
-                                // Make the HTTP GET request, marshaling the response to a String
-                                String result = restTemplate.getForObject(url, String.class);
-
-                                cart_fragment.list.add(result);
                                 MyCustomList adapter1 = new MyCustomList(cart_fragment.list, context);
 
                                 ListView lView = (ListView) findViewById(R.id.editTextResult);
@@ -213,19 +241,8 @@ public class MainActivity extends ActionBarActivity {
     //we have a result
             String scanContent = scanningResult.getContents();
 
-            String url = "http://192.168.43.96:8080/rest/product/"+scanContent;
+            getData(scanContent);
 
-            // Create a new RestTemplate instance
-            RestTemplate restTemplate = new RestTemplate();
-
-            // Add the String message converter
-            restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
-
-            // Make the HTTP GET request, marshaling the response to a String
-            String result = restTemplate.getForObject(url, String.class);
-
-
-            cart_fragment.list.add(result);
             MyCustomList  adapter1= new MyCustomList(cart_fragment.list,context);
 
             ListView lView = (ListView) findViewById(R.id.editTextResult);
@@ -238,6 +255,16 @@ public class MainActivity extends ActionBarActivity {
                     "No scan data received!", Toast.LENGTH_SHORT);
             toast.show();
         }
+    }
+
+    public void scheduleUpdate() {
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            public void run() {
+                Cal();
+                handler.postDelayed(this, 1000);
+            }
+        }, 1000);
     }
 
 }
