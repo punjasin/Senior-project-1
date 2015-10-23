@@ -22,7 +22,6 @@ public class cart_fragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        //String strtext=getArguments().getString("name");
         View v =inflater.inflate(R.layout.cart,container,false);
 
 
