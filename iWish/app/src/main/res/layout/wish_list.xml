@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:theme="@style/Base.ThemeOverlay.AppCompat.Dark"
+    android:id="@+id/layout_root">
+
+    <TextView
+        android:id="@+id/list_item_wish"
+        android:layout_width="225dp"
+        android:layout_height="25dp"
+        android:paddingLeft="5dp"
+        android:textSize="14sp"
+        android:textColor="@color/primary_dark_material_dark"
+        android:layout_alignBottom="@+id/amount"
+        android:layout_toEndOf="@+id/imageDetailWish" />
+
+    <ImageButton
+        android:id="@+id/deleteWish_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="5dp"
+        android:src="@android:drawable/ic_delete"
+        />
+
+    <EditText
+        android:id="@+id/amount_wish"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@id/deleteWish_btn"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="10dp"
+        android:inputType="number"
+        android:textColor="@color/ColorPrimary"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageDetailWish"
+        android:layout_alignTop="@+id/list_item_wish"
+        android:layout_toEndOf="@+id/checkWish"/>
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/checkWish"
+        android:checked="false"
+        android:clickable="false"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textPrice"
+        android:layout_below="@+id/list_item_wish"
+        android:layout_alignStart="@+id/list_item_wish"
+        android:textColor="@color/primary_dark_material_dark"
+        android:textSize="12sp"
+        android:paddingLeft="5dp"
+        android:layout_marginTop="18dp" />
+
+
+</RelativeLayout>
