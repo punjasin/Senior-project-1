@@ -24,6 +24,7 @@ import android.text.method.ScrollingMovementMethod;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -55,6 +56,8 @@ import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -77,6 +80,7 @@ public class MainActivity extends ActionBarActivity {
     public static boolean save=false;
     public static boolean cal=true;
     public static boolean calw=true;
+    public static product current=null;
 
 
 
@@ -143,8 +147,6 @@ public class MainActivity extends ActionBarActivity {
             e.printStackTrace();
         }
 
-
-
         scheduleUpdate();
 
     }
@@ -158,51 +160,51 @@ public class MainActivity extends ActionBarActivity {
 //        return true;
 //    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        final Context context = this;
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
-
-            // set title
-            alertDialogBuilder.setTitle("iWish");
-
-            // set dialog message
-            alertDialogBuilder
-                    .setMessage("Are you sure?")
-                    .setCancelable(false)
-                    .setNegativeButton("No",new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog,int id) {
-                            // if this button is clicked, just close
-                            // the dialog box and do nothing
-                            dialog.cancel();
-                        }
-                    })
-                    .setPositiveButton("Yes",new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog,int id) {
-                            // if this button is clicked, close
-                            // current activity
-                            MainActivity.this.finish();
-                        }
-                    });
-
-            // create alert dialog
-            AlertDialog alertDialog = alertDialogBuilder.create();
-
-            // show it
-            alertDialog.show();
-
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        // Handle action bar item clicks here. The action bar will
+//        // automatically handle clicks on the Home/Up button, so long
+//        // as you specify a parent activity in AndroidManifest.xml.
+//        int id = item.getItemId();
+//        final Context context = this;
+//
+//        //noinspection SimplifiableIfStatement
+//        if (id == R.id.action_settings) {
+//            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+//
+//            // set title
+//            alertDialogBuilder.setTitle("iWish");
+//
+//            // set dialog message
+//            alertDialogBuilder
+//                    .setMessage("Are you sure?")
+//                    .setCancelable(false)
+//                    .setNegativeButton("No",new DialogInterface.OnClickListener() {
+//                        public void onClick(DialogInterface dialog,int id) {
+//                            // if this button is clicked, just close
+//                            // the dialog box and do nothing
+//                            dialog.cancel();
+//                        }
+//                    })
+//                    .setPositiveButton("Yes",new DialogInterface.OnClickListener() {
+//                        public void onClick(DialogInterface dialog,int id) {
+//                            // if this button is clicked, close
+//                            // current activity
+//                            MainActivity.this.finish();
+//                        }
+//                    });
+//
+//            // create alert dialog
+//            AlertDialog alertDialog = alertDialogBuilder.create();
+//
+//            // show it
+//            alertDialog.show();
+//
+//            return true;
+//        }
+//
+//        return super.onOptionsItemSelected(item);
+//    }
 
 
     public void Cal(){
@@ -355,6 +357,8 @@ public class MainActivity extends ActionBarActivity {
 
     public void getData(String id){
 
+        product p = null;
+
         try {
 
             String url = "http://192.168.43.96:8080/rest/product/" + id;
@@ -378,7 +382,7 @@ public class MainActivity extends ActionBarActivity {
             String image = jsonImage.getString("content");
 
             if( jsonObject.get("amount").toString().equals("null") || jsonObject.get("promoprice").toString().equals("null") ) {
-                product p = new product(jsonObject.get("code").toString(), jsonObject.get("name").toString(), jsonObject.get("description").toString(), jsonObject.get("categorize").toString(), Double.valueOf(jsonObject.get("netweight").toString()), Double.valueOf(jsonObject.get("price").toString()), 1, image);
+                 p = new product(jsonObject.get("code").toString(), jsonObject.get("name").toString(), jsonObject.get("description").toString(), jsonObject.get("categorize").toString(), Double.valueOf(jsonObject.get("netweight").toString()), Double.valueOf(jsonObject.get("price").toString()),Integer.valueOf(jsonObject.get("zone").toString()),Integer.valueOf(jsonObject.get("shelf").toString()), 1, image, 0);
 
                 for (product item : cart_fragment.list) {
                     if (p.getCode().equals(item.getCode())) {
@@ -402,7 +406,7 @@ public class MainActivity extends ActionBarActivity {
             }
 
             else {
-                product p = new product(jsonObject.get("code").toString(), jsonObject.get("name").toString(), jsonObject.get("description").toString(), jsonObject.get("categorize").toString(), Double.valueOf(jsonObject.get("netweight").toString()), Double.valueOf(jsonObject.get("price").toString()), Integer.valueOf(jsonObject.get("amount").toString()), Double.valueOf(jsonObject.get("promoprice").toString()), 1,image);
+                 p = new product(jsonObject.get("code").toString(), jsonObject.get("name").toString(), jsonObject.get("description").toString(), jsonObject.get("categorize").toString(), Double.valueOf(jsonObject.get("netweight").toString()), Double.valueOf(jsonObject.get("price").toString()), Integer.valueOf(jsonObject.get("amount").toString()), Double.valueOf(jsonObject.get("promoprice").toString()),Integer.valueOf(jsonObject.get("zone").toString()),Integer.valueOf(jsonObject.get("shelf").toString()), 1,image, 0);
                 for (product item : cart_fragment.list) {
                     if (p.getCode().equals(item.getCode())) {
                         nw = false;
@@ -432,7 +436,8 @@ public class MainActivity extends ActionBarActivity {
             ex.printStackTrace();
         }
 
-
+        current = p;
+        sortingList();
         freshCart=true;
         NFC = false;
 
@@ -463,11 +468,11 @@ public class MainActivity extends ActionBarActivity {
                 JSONObject jsonImage = jsonImages.getJSONObject(0);
                 String image = jsonImage.getString("content");
                 if (jsonObject.get("amount").toString().equals("null") || jsonObject.get("promoprice").toString().equals("null")) {
-                    product p = new product(jsonObject.get("code").toString(), jsonObject.get("name").toString(), jsonObject.get("description").toString(), jsonObject.get("categorize").toString(), Double.valueOf(jsonObject.get("netweight").toString()), Double.valueOf(jsonObject.get("price").toString()), 1, image);
+                    product p = new product(jsonObject.get("code").toString(), jsonObject.get("name").toString(), jsonObject.get("description").toString(), jsonObject.get("categorize").toString(), Double.valueOf(jsonObject.get("netweight").toString()), Double.valueOf(jsonObject.get("price").toString()),Integer.valueOf(jsonObject.get("zone").toString()),Integer.valueOf(jsonObject.get("shelf").toString()), 1, image,0);
                     add_list.add(p);
 
                 } else {
-                    product p = new product(jsonObject.get("code").toString(), jsonObject.get("name").toString(), jsonObject.get("description").toString(), jsonObject.get("categorize").toString(), Double.valueOf(jsonObject.get("netweight").toString()), Double.valueOf(jsonObject.get("price").toString()), Integer.valueOf(jsonObject.get("amount").toString()), Double.valueOf(jsonObject.get("promoprice").toString()), 1, image);
+                    product p = new product(jsonObject.get("code").toString(), jsonObject.get("name").toString(), jsonObject.get("description").toString(), jsonObject.get("categorize").toString(), Double.valueOf(jsonObject.get("netweight").toString()), Double.valueOf(jsonObject.get("price").toString()), Integer.valueOf(jsonObject.get("amount").toString()), Double.valueOf(jsonObject.get("promoprice").toString()),Integer.valueOf(jsonObject.get("zone").toString()),Integer.valueOf(jsonObject.get("shelf").toString()), 1, image, 0);
                     add_list.add(p);
                 }
             }
@@ -758,6 +763,20 @@ public class MainActivity extends ActionBarActivity {
 
     }
 
+    public void sortingList(){
+
+        for (product item : wishlist_fragment.list_wish) {
+            int zone = Math.abs(current.getZone()- item.getZone());
+            int shelf = Math.abs(current.getShelf()- item.getShelf());
+            int distant = zone + shelf;
+            item.setDistant(distant);
+        }
+
+        Collections.sort(wishlist_fragment.list_wish,new product());
+
+
+    }
+
     public void selectedCategorizes(){
         LayoutInflater li = LayoutInflater.from(context);
         View promptsView = li.inflate(R.layout.add_prompt, null);
@@ -790,12 +809,12 @@ public class MainActivity extends ActionBarActivity {
                 JSONObject jsonImage = jsonImages.getJSONObject(0);
                 String image = jsonImage.getString("content");
                 if (jsonObject.get("amount").toString().equals("null") || jsonObject.get("promoprice").toString().equals("null")) {
-                    product p = new product(jsonObject.get("code").toString(), jsonObject.get("name").toString(), jsonObject.get("description").toString(), jsonObject.get("categorize").toString(), Double.valueOf(jsonObject.get("netweight").toString()), Double.valueOf(jsonObject.get("price").toString()), 1,image);
+                    product p = new product(jsonObject.get("code").toString(), jsonObject.get("name").toString(), jsonObject.get("description").toString(), jsonObject.get("categorize").toString(), Double.valueOf(jsonObject.get("netweight").toString()), Double.valueOf(jsonObject.get("price").toString()),Integer.valueOf(jsonObject.get("zone").toString()),Integer.valueOf(jsonObject.get("shelf").toString()), 1, image, 0);
                     add_list.add(p);
 
 
                 } else {
-                    product p = new product(jsonObject.get("code").toString(), jsonObject.get("name").toString(), jsonObject.get("description").toString(), jsonObject.get("categorize").toString(), Double.valueOf(jsonObject.get("netweight").toString()), Double.valueOf(jsonObject.get("price").toString()), Integer.valueOf(jsonObject.get("amount").toString()), Double.valueOf(jsonObject.get("promoprice").toString()), 1,image);
+                    product p = new product(jsonObject.get("code").toString(), jsonObject.get("name").toString(), jsonObject.get("description").toString(), jsonObject.get("categorize").toString(), Double.valueOf(jsonObject.get("netweight").toString()), Double.valueOf(jsonObject.get("price").toString()), Integer.valueOf(jsonObject.get("amount").toString()), Double.valueOf(jsonObject.get("promoprice").toString()),Integer.valueOf(jsonObject.get("zone").toString()),Integer.valueOf(jsonObject.get("shelf").toString()), 1, image, 0);
                     add_list.add(p);
 
                 }
@@ -829,7 +848,7 @@ public class MainActivity extends ActionBarActivity {
 
             getData(scanContent);
 
-
+            NFC();
         }
         else{
             Toast toast = Toast.makeText(getApplicationContext(),

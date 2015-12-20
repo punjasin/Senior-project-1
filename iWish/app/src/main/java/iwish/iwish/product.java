@@ -1,11 +1,12 @@
 package iwish.iwish;
 
 import java.io.Serializable;
+import java.util.Comparator;
 
 /**
  * Created by Visava on 8/10/2015.
  */
-public class product implements Serializable {
+public class product implements Serializable, Comparator<product> {
     String code;
     String name;
     String description;
@@ -15,26 +16,32 @@ public class product implements Serializable {
     int amountOf;
     Integer amount;
     Double promoprice;
+    Integer zone;
+    Integer shelf;
     boolean status;
     String Image;
+    Integer distant;
 
     public product() {
 
     }
 
-    public product(String code, String name, String description, String categorize, Double netweight, Double price, int amountOf, String Image) {
+    public product(String code, String name, String description, String categorize, Double netweight, Double price, Integer zone, Integer shelf, int amountOf, String Image, Integer distant) {
         this.code = code;
         this.name = name;
         this.description = description;
         this.categorize = categorize;
         this.netweight = netweight;
         this.price = price;
+        this.zone = zone;
+        this.shelf = shelf;
         this.amountOf = amountOf;
         this.status = false;
         this.Image = Image;
+        this.distant = distant;
     }
 
-    public product(String code, String name, String description, String categorize, Double netweight, Double price, Integer amount, Double promoprice, int amountOf, String Image) {
+    public product(String code, String name, String description, String categorize, Double netweight, Double price, Integer amount, Double promoprice, Integer zone, Integer shelf, int amountOf, String Image, Integer distant) {
         this.code = code;
         this.name = name;
         this.description = description;
@@ -43,9 +50,13 @@ public class product implements Serializable {
         this.price = price;
         this.amount = amount;
         this.promoprice = promoprice;
+        this.zone = zone;
+        this.shelf = shelf;
         this.amountOf = amountOf;
         this.status = false;
         this.Image = Image;
+        this.distant = distant;
+
     }
 
     public String getName() {
@@ -120,6 +131,22 @@ public class product implements Serializable {
         this.promoprice = promoprice;
     }
 
+    public Integer getZone() {
+        return zone;
+    }
+
+    public void setZone(Integer zone) {
+        this.zone = zone;
+    }
+
+    public Integer getShelf() {
+        return shelf;
+    }
+
+    public void setShelf(Integer shelf) {
+        this.shelf = shelf;
+    }
+
     public boolean isStatus() {
         return status;
     }
@@ -134,6 +161,29 @@ public class product implements Serializable {
 
     public void setImage(String image) {
         Image = image;
+    }
+
+    public Integer getDistant() {
+        return distant;
+    }
+
+    public void setDistant(Integer distant) {
+        this.distant = distant;
+    }
+
+    @Override
+    public int compare(product one, product another){
+        int returnVal = 0;
+
+        if(one.getDistant() < another.getDistant()){
+            returnVal =  -1;
+        }else if(one.getDistant() > another.getDistant()){
+            returnVal =  1;
+        }else if(one.getDistant() == another.getDistant()){
+            returnVal =  0;
+        }
+        return returnVal;
+
     }
 
 
@@ -153,12 +203,16 @@ public class product implements Serializable {
         if (code != null ? !code.equals(product.code) : product.code != null) return false;
         if (description != null ? !description.equals(product.description) : product.description != null)
             return false;
+        if (distant != null ? !distant.equals(product.distant) : product.distant != null)
+            return false;
         if (name != null ? !name.equals(product.name) : product.name != null) return false;
         if (netweight != null ? !netweight.equals(product.netweight) : product.netweight != null)
             return false;
         if (price != null ? !price.equals(product.price) : product.price != null) return false;
         if (promoprice != null ? !promoprice.equals(product.promoprice) : product.promoprice != null)
             return false;
+        if (shelf != null ? !shelf.equals(product.shelf) : product.shelf != null) return false;
+        if (zone != null ? !zone.equals(product.zone) : product.zone != null) return false;
 
         return true;
     }
@@ -174,8 +228,12 @@ public class product implements Serializable {
         result = 31 * result + amountOf;
         result = 31 * result + (amount != null ? amount.hashCode() : 0);
         result = 31 * result + (promoprice != null ? promoprice.hashCode() : 0);
+        result = 31 * result + (zone != null ? zone.hashCode() : 0);
+        result = 31 * result + (shelf != null ? shelf.hashCode() : 0);
         result = 31 * result + (status ? 1 : 0);
         result = 31 * result + (Image != null ? Image.hashCode() : 0);
+        result = 31 * result + (distant != null ? distant.hashCode() : 0);
         return result;
     }
+
 }
